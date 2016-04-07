@@ -126,8 +126,6 @@
         animate();
 
         function init() {
-//            container = document.getElementById('mainCanvas');
-//            document.body.appendChild( container );
             var container = document.getElementById('mainCanvas');
             width = container.width;
             height = container.height;
@@ -184,15 +182,14 @@
             renderer.setSize( width, height );
 
             transformControl = new THREE.TransformControls(camera,renderer.domElement);
-            transformControl.addEventListener('change',render);
 
             orbitControl = new THREE.OrbitControls( camera, renderer.domElement );
             orbitControl.enableDamping = true;
-            orbitControl.dampingFactor = 0.25;
+            orbitControl.dampingFactor = 0.15;
             orbitControl.enableZoom = true;
             orbitControl.zoomSpeed = 1;
 
-            document.addEventListener( 'mouseup', onDocumentMouseUp, false );
+            document.addEventListener( 'mousedown', onDocumentMouseDown, false );
             document.addEventListener( 'touchstart', onDocumentTouchStart, false );
 
             window.addEventListener( 'resize', onWindowResize, false );
@@ -213,11 +210,11 @@
 
             event.offsetX = event.touches[0].offsetX;
             event.offsetY = event.touches[0].offsetY;
-            onDocumentMouseUp( event );
+            onDocumentMouseDown( event );
 
         }
 
-        function onDocumentMouseUp( event ) {
+        function onDocumentMouseDown( event ) {
 
             event.preventDefault();
 
