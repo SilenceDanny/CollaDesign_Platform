@@ -123,6 +123,7 @@
         var mouse;
         var width,height;
         var selected;
+        var boxHelper;
 
         var objects = [];
 
@@ -230,7 +231,10 @@
             var intersects = raycaster.intersectObjects( objects );
 
             if ( intersects.length > 0 ) {
+                scene.remove(boxHelper);
                 transformControl.attach(intersects[ 0 ].object);
+                boxHelper = new THREE.BoxHelper(intersects[0].object);
+                scene.add(boxHelper);
                 selected = objects.indexOf(intersects[ 0 ].object);
                 scene.add(transformControl);
             }
@@ -242,6 +246,9 @@
         }
 
         function render() {
+            scene.remove(boxHelper);
+            boxHelper = new THREE.BoxHelper(objects[selected]);
+            scene.add(boxHelper);
             transformControl.update();
             orbitControl.update();
             renderer.render( scene, camera );
