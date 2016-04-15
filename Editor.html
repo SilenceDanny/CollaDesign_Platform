@@ -77,8 +77,8 @@
                     <div class="well sidebar-nav">
                         <ul class="nav nav-list">
                             <li class="nav-header">基本图形</li>
-                            <li class="active"><a href="#">0</a></li>
-                            <li><a href="#">1</a></li>
+                            <!--<li class="active"></li>-->
+                            <li><img src="src/img/cube.png" style="width: 120px;height: 100px" ondblclick="addCube()"></li>
                             <li><a href="#">2</a></li>
                             <li><a href="#">3</a></li>
                             <li class="nav-header">常用图形</li>
@@ -108,12 +108,15 @@
     
         <script src="http://code.jquery.com/jquery.js"></script>
         <script src="js/bootstrap.min.js"></script>
-        <script src="js/three.min.js"></script>
-        <script src="js/Projector.js"></script>
-        <script src="js/CanvasRenderer.js"></script>
-        <script src="js/TransformControls.js"></script>
-        <script src="js/OrbitControls.js"></script>
-        <script src="js/stats.min.js"></script>
+        <script src="js/Threejs/three.js"></script>
+        <script src="js/Threejs/Projector.js"></script>
+        <script src="js/Threejs/CanvasRenderer.js"></script>
+        <script src="js/Threejs/TransformControls.js"></script>
+        <script src="js/Threejs/OrbitControls.js"></script>
+        <script src="js/Threejs/stats.min.js"></script>
+
+        <script src="js/Threejs/OBJLoader.js"></script>
+        <script src="js/Threejs/MTLLoader.js"></script>
 
         <script>
         var container, stats;
@@ -124,6 +127,7 @@
         var width,height;
         var selected;
         var boxHelper;
+        var projector;
 
         var objects = [];
 
@@ -141,42 +145,65 @@
             scene = new THREE.Scene();
             scene.add( new THREE.GridHelper( 1000, 100 ) );
 
+            var directionalLight = new THREE.DirectionalLight( 0xffeedd ,1.5 );
+            directionalLight.position.set( 1, 1, 1 ).normalize();
+            scene.add( directionalLight );
+
             var geometry = new THREE.BoxGeometry( 100, 100, 100 );
 
-            for ( var i = 0; i < 10; i ++ ) {
-
-                var object = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial( { color: Math.random() * 0xffffff, opacity: 0.5 } ) );
-                object.position.x = Math.random() * 800 - 400;
-                object.position.y = Math.random() * 800 - 400;
-                object.position.z = Math.random() * 800 - 400;
-
-                object.scale.x = Math.random() * 2 + 1;
-                object.scale.y = Math.random() * 2 + 1;
-                object.scale.z = Math.random() * 2 + 1;
-
-                object.rotation.x = Math.random() * 2 * Math.PI;
-                object.rotation.y = Math.random() * 2 * Math.PI;
-                object.rotation.z = Math.random() * 2 * Math.PI;
-
-                scene.add( object );
-
-                objects.push( object );
-
-            }
-
-            var PI2 = Math.PI * 2;
-            particleMaterial = new THREE.SpriteCanvasMaterial( {
-
-                color: 0x000000,
-                program: function ( context ) {
-
-                    context.beginPath();
-                    context.arc( 0, 0, 0.5, 0, PI2, true );
-                    context.fill();
-
-                }
-
-            } );
+//            var mtlLoader = new THREE.MTLLoader();
+//            mtlLoader.setBaseUrl( 'src/model/' );
+//            mtlLoader.setPath( 'src/model/' );
+//            mtlLoader.load( 'testobj.mtl', function( materials ) {
+//
+//                materials.preload();
+//
+//                var objLoader = new THREE.OBJLoader();
+//                objLoader.setMaterials( materials );
+//                objLoader.setPath( 'src/model/' );
+//                objLoader.load( 'testobj.obj', function ( object ) {
+//                    scene.add( object );
+//                    objects.push(object.children[0]);
+//                    console.log(object);
+//                });
+//
+//            });
+//
+//            for ( var i = 0; i < 10; i ++ ) {
+//
+//                var object = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial( { color: Math.random() * 0xffffff, opacity: 0.5 } ) );
+//                object.position.x = Math.random() * 800 - 400;
+//                object.position.y = Math.random() * 800 - 400;
+//                object.position.z = Math.random() * 800 - 400;
+//
+//                object.scale.x = Math.random() * 2 + 1;
+//                object.scale.y = Math.random() * 2 + 1;
+//                object.scale.z = Math.random() * 2 + 1;
+//
+//                object.rotation.x = Math.random() * 2 * Math.PI;
+//                object.rotation.y = Math.random() * 2 * Math.PI;
+//                object.rotation.z = Math.random() * 2 * Math.PI;
+//
+//                scene.add( object );
+//
+//                objects.push( object );
+//
+//            }
+//
+//
+//            var PI2 = Math.PI * 2;
+//            particleMaterial = new THREE.SpriteCanvasMaterial( {
+//
+//                color: 0x000000,
+//                program: function ( context ) {
+//
+//                    context.beginPath();
+//                    context.arc( 0, 0, 0.5, 0, PI2, true );
+//                    context.fill();
+//
+//                }
+//
+//            } );
 
             raycaster = new THREE.Raycaster();
             projector = new THREE.Projector();
@@ -188,7 +215,7 @@
 
             transformControl = new THREE.TransformControls(camera,renderer.domElement);
 
-            orbitControl = new THREE.OrbitControls( camera, renderer.domElement );
+            orbitControl = new THREE.OrbitControls(camera,renderer.domElement);
             orbitControl.enableDamping = true;
             orbitControl.dampingFactor = 0.15;
             orbitControl.enableZoom = true;
@@ -228,7 +255,7 @@
 
             raycaster.setFromCamera( mouse, camera );
 
-            var intersects = raycaster.intersectObjects( objects );
+            var intersects = raycaster.intersectObjects(objects);
 
             if ( intersects.length > 0 ) {
                 scene.remove(boxHelper);
@@ -270,7 +297,17 @@
             function update(jscolor){
                 var color = new THREE.Color('#' + jscolor);
                 objects[selected].material.color = color;
-                render();
+            }
+
+            function addCube(){
+                var geometry = new THREE.BoxGeometry( 100, 100, 100 );
+                var object = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial( { color: Math.random() * 0xffffff, opacity: 0.5 } ) );
+                object.position.x = 0;
+                object.position.y = 0;
+                object.position.z = 0;
+
+                scene.add( object );
+                objects.push( object );
             }
 	</script>
   </body>
